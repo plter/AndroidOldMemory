@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300" title="配置面板"
+			   close="titlewindow1_closeHandler(event)" addedToStage="titlewindow1_addedToStageHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.collections.ArrayCollection;
+			import mx.events.CloseEvent;
+			import mx.events.ColorPickerEvent;
+			import mx.events.DropdownEvent;
+			import mx.managers.PopUpManager;
+			
+			import spark.events.IndexChangeEvent;
+			private var _jpgQuality:int=60;
+			
+			private static var __thisClass:ConfigWindow;
+			
+			[Bindable]
+			public var fontsCbDataP:ArrayCollection=new ArrayCollection([{label: "Arial"}, {label: "Courier"}, {label: "Courier New"}, {label: "Geneva"}, {label: "Georgia"}, {label: "Helvetica"}, {label: "Times New Roman"}, {label: "Times"}, {label: "Verdana"}]);
+			
+			public static function show():void
+			{
+				PopUpManager.addPopUp(configWindow, ImageWaterMarker.mainApp, true);
+				PopUpManager.centerPopUp(configWindow);
+			}
+			
+			public static function get configWindow():ConfigWindow
+			{
+				if (__thisClass == null)
+				{
+					__thisClass=new ConfigWindow;
+				}
+				return __thisClass;
+			}
+			
+			public function close():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+			
+			/**
+			 * 在对图片进行jpg格式的压缩时的质量
+			 */
+			public function get jpgQuality():int
+			{
+				return _jpgQuality;
+			}
+			
+			/**
+			 * @private
+			 */
+			public function set jpgQuality(value:int):void
+			{
+				_jpgQuality=value;
+			}
+			
+			
+			protected function compHSlider_changeHandler(event:Event):void
+			{
+				jpgQuality=compHSlider.value;
+				SharedObjectMgr.sharedObjectMgr.jpgQuality=compHSlider.value;
+				
+				setCompLabelText();
+			}
+			
+			private function setCompLabelText():void
+			{
+				compLabel.text="Jpg压缩率：" + jpgQuality + "%";
+			}
+			
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				this.close();
+			}
+			
+			
+			protected function closeBtn_clickHandler(event:MouseEvent):void
+			{
+				this.close();
+			}
+			
+			
+			private var _textFiled:TextField=new TextField;
+			
+			public function get textFiled():TextField
+			{
+				getMainAppInputTxt();
+				return _textFiled;
+			}
+			
+			private var _textFiledFormat:TextFormat=new TextFormat;
+			
+			protected function textFieldContainer_creationCompleteHandler(event:FlexEvent):void
+			{
+				textFieldContainer.addChild(_textFiled);
+				this._textFiled.autoSize=TextFieldAutoSize.LEFT;
+			}
+			
+			/**
+			 * 刷新样式
+			 */
+			private function refreshFormat():void{
+				this._textFiled.setTextFormat(this._textFiledFormat);
+			}
+			
+			private function setInputTxt(value:String):void
+			{
+				this._textFiled.text=value;
+				refreshFormat();
+			}
+			
+			/**
+			 * 取得主类中输入的文字
+			 */
+			private function getMainAppInputTxt():void{
+				_textFiledFormat.size=SharedObjectMgr.sharedObjectMgr.textSize;
+				_textFiled.textColor=SharedObjectMgr.sharedObjectMgr.textColor;
+				_textFiledFormat.font=SharedObjectMgr.sharedObjectMgr.textFont;
+				
+				this.setInputTxt(ImageWaterMarker.mainApp.markInputTxt.text);
+			}
+			
+			
+			protected function titlewindow1_addedToStageHandler(event:Event):void
+			{
+				getMainAppInputTxt();
+			}
+			
+			protected function textFontCb_changeHandler(event:IndexChangeEvent):void
+			{
+				_textFiledFormat.font=textFontCb.selectedItem.label;
+				SharedObjectMgr.sharedObjectMgr.textFont=textFontCb.selectedItem.label;
+				refreshFormat();
+			}
+			
+			
+			protected function textColorCp_closeHandler(event:Event):void
+			{
+				this._textFiled.textColor=this.textColorCp.selectedColor;
+				SharedObjectMgr.sharedObjectMgr.textColor=this.textColorCp.selectedColor;
+				refreshFormat();
+			}
+			
+			
+			protected function textSizeSlider_changeHandler(event:Event):void
+			{
+				this._textFiledFormat.size=textSizeSlider.value;
+				SharedObjectMgr.sharedObjectMgr.textSize=textSizeSlider.value;
+				reFreshTextSizeLabel();
+				refreshFormat();
+			}
+			
+			
+			protected function textColorCp_creationCompleteHandler(event:FlexEvent):void
+			{
+				this._textFiled.textColor=SharedObjectMgr.sharedObjectMgr.textColor;
+				textColorCp.selectedColor=SharedObjectMgr.sharedObjectMgr.textColor;
+			}
+			
+			protected function textFontCb_creationCompleteHandler(event:FlexEvent):void
+			{
+				_textFiledFormat.font=SharedObjectMgr.sharedObjectMgr.textFont;
+				refreshFormat();
+				
+				var length:int=fontsCbDataP.length;
+				for(var i:int=0;i<length;i++){
+					if(fontsCbDataP[i].label==_textFiledFormat.font){
+						textFontCb.selectedIndex=i;
+						break;
+					}
+				}
+			}
+			
+			
+			protected function textSizeSlider_creationCompleteHandler(event:FlexEvent):void
+			{
+				_textFiledFormat.size=SharedObjectMgr.sharedObjectMgr.textSize;
+				textSizeSlider.value=SharedObjectMgr.sharedObjectMgr.textSize;
+				reFreshTextSizeLabel();
+				refreshFormat();
+			}
+			
+			private function reFreshTextSizeLabel():void{
+				textSizeLabel.text="字号："+_textFiledFormat.size;
+			}
+			
+			
+			protected function alphaHSlider_changeHandler(event:Event):void
+			{
+				SharedObjectMgr.sharedObjectMgr.markAlpha=alphaHSlider.value;
+				alphaLabel.text="透明值："+SharedObjectMgr.sharedObjectMgr.markAlpha.toFixed(2);
+			}
+			
+			
+			protected function alphaHSlider_creationCompleteHandler(event:FlexEvent):void
+			{
+				alphaHSlider.value=SharedObjectMgr.sharedObjectMgr.markAlpha;
+				alphaLabel.text="透明值："+SharedObjectMgr.sharedObjectMgr.markAlpha.toFixed(2);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:Group top="10" left="10" right="10" bottom="30">
+		<mx:TabNavigator width="100%" height="100%">
+			<s:NavigatorContent label="水印文字" width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				<s:Group width="100%">
+					<s:layout>
+						<s:HorizontalLayout/>
+					</s:layout>
+					<s:Label text="颜色："/>
+					<mx:ColorPicker id="textColorCp" close="textColorCp_closeHandler(event)" creationComplete="textColorCp_creationCompleteHandler(event)"/>
+					<s:Label text="透明度：" id="alphaLabel" width="80"/>
+					<s:HSlider maximum="1" minimum="0.01" stepSize="0.01" id="alphaHSlider" change="alphaHSlider_changeHandler(event)" creationComplete="alphaHSlider_creationCompleteHandler(event)"/>
+				</s:Group>
+				<s:Group width="100%">
+					<s:layout>
+						<s:HorizontalLayout/>
+					</s:layout>
+					<s:Label text="字体："/>
+					<s:ComboBox id="textFontCb" dataProvider="{this.fontsCbDataP}" change="textFontCb_changeHandler(event)" creationComplete="textFontCb_creationCompleteHandler(event)"/>
+				</s:Group>
+				
+				<s:Group width="100%">
+					<s:layout>
+						<s:HorizontalLayout/>
+					</s:layout>
+					<s:Label id="textSizeLabel" width="80" text="字号："/>
+					<s:HSlider width="200" id="textSizeSlider" minimum="9" maximum="50" change="textSizeSlider_changeHandler(event)" creationComplete="textSizeSlider_creationCompleteHandler(event)"/>
+				</s:Group>
+				<mx:UIComponent id="textFieldContainer" creationComplete="textFieldContainer_creationCompleteHandler(event)"/>
+			</s:NavigatorContent>
+			<s:NavigatorContent label="Jpg压缩选项" width="100%" height="100%">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				<fx:Script>
+					<![CDATA[
+						import com.plter.iwm.tools.SharedObjectMgr;
+						
+						import mx.events.FlexEvent;
+						
+						protected function compLabel_creationCompleteHandler(event:FlexEvent):void
+						{
+							this.jpgQuality=SharedObjectMgr.sharedObjectMgr.jpgQuality;
+							
+							setCompLabelText();
+						}
+						
+						
+						protected function compHSlider_creationCompleteHandler(event:FlexEvent):void
+						{
+							this.jpgQuality=SharedObjectMgr.sharedObjectMgr.jpgQuality;
+							
+							compHSlider.value=this.jpgQuality;
+						}
+					]]>
+				</fx:Script>
+				<s:Label id="compLabel" text="压缩率" creationComplete="compLabel_creationCompleteHandler(event)"/>
+				<s:HSlider id="compHSlider" minimum="10" maximum="100" toolTip="在对图片进行jpg格式压缩时此值有效" width="200" change="compHSlider_changeHandler(event)"
+						   creationComplete="compHSlider_creationCompleteHandler(event)"/>
+				
+			</s:NavigatorContent>
+		</mx:TabNavigator>
+	</s:Group>
+	
+	<s:Button label="关闭" id="closeBtn" click="closeBtn_clickHandler(event)" x="164" bottom="5"/>
+</s:TitleWindow>

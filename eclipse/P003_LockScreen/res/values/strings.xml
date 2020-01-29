@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+	<string name="app_name">锁屏工具</string>
+    <string name="lockScreen">锁屏</string>
+    <string name="configLockScreen">锁屏配置</string>
+    <string name="enable_lock_screen">启用锁屏功能</string>
+    <string name="help">\n
+    					使用说明：\n
+    					1.本程序安装后会生成两个应用程序图标，分别为“锁屏”和“锁屏配置”。\n
+    					2.在“锁屏配置”中开启锁屏功能后可以直接点击“锁屏”图标进行锁屏。\n
+    					3.运行本程序后，在黑屏状态下，用手掌轻轻滑过屏幕，可点亮屏幕。\n
+    					4.点击距离感应器（一般在屏幕的左上角）可直接点亮屏幕。\n
+    					5.用手掌轻拍屏幕可以开屏。\n
+    					\n
+    					开屏原理：\n
+    					本程序运行后，创建一个服务，在该服务中侦听距离感应器的相关数据变化，如果在500毫秒（半秒）内变化很大，视为开屏操作，则调用相关程序点亮屏幕。
+    					\n</string>
+    <string name="plter">http://plter.com</string>
+</resources>

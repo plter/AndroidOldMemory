@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx" addedToStage="titlewindow1_addedToStageHandler(event)"
+			   close="titlewindow1_closeHandler(event)" toolTip="双击可关闭此窗口" xmlns:views="com.plter.iwm.views.*" doubleClickEnabled="true" doubleClick="titlewindow1_doubleClickHandler(event)">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.managers.PopUpManager;
+			
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				close();
+			}
+			
+			private var _fr:FileReference;
+			
+			/**
+			 * 开始加载图片
+			 */
+			public function startLoadImage(fr:FileReference):void
+			{
+				_fr=fr;
+				_fr.addEventListener(Event.COMPLETE, imageLoadedHandler);
+				_fr.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+				_fr.load();
+			}
+			
+			public function close():void
+			{
+				PopUpManager.removePopUp(this);
+				this.imageLoader.unloadAndStop();
+			}
+			
+			/**
+			 * 加载二进制图片
+			 * @param       bytes   图片数据
+			 */
+			public function loadBytes(bytes:ByteArray):void{
+				imageLoader.loadBytes(bytes);
+			}
+			
+			private function imageLoadedHandler(event:Event):void
+			{
+				removeEventListeners();
+				
+				imageLoader.loadBytes(_fr.data);
+				_fr.data.length=0;
+			}
+			
+			private function ioErrorHandler(event:IOErrorEvent):void
+			{
+				removeEventListeners();
+			}
+			
+			private function removeEventListeners():void
+			{
+				_fr.removeEventListener(Event.COMPLETE, imageLoadedHandler);
+				_fr.removeEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+			}
+			
+			public static function viewImage(fr:FileReference):void
+			{
+				showNewImageBrowserWindow().startLoadImage(fr);
+			}
+			
+			/**
+			 * 加载二进制图片
+			 * @param       bytes   图片数据
+			 */
+			public static function loadBytes(bytes:ByteArray):void{
+				showNewImageBrowserWindow().loadBytes(bytes);
+			}
+			
+			private static function showNewImageBrowserWindow():ImageBrowerWindow{
+				var win:ImageBrowerWindow=new ImageBrowerWindow;
+				PopUpManager.addPopUp(win, FlexGlobals.topLevelApplication as DisplayObject);
+				return win;
+			}
+			
+			
+			protected function titlewindow1_addedToStageHandler(event:Event):void
+			{
+				this.width=stage.stageWidth - 20;
+				this.height=stage.stageHeight - 20;
+			}
+			
+			
+			protected function imageLoader_imageLoadedHandler(event:ImageBrowerEvent):void
+			{
+				this.width=imageLoader.getContent().width + 2;
+				this.height=imageLoader.getContent().height + 33;
+				PopUpManager.centerPopUp(this);
+			}
+			
+			
+			protected function titlewindow1_doubleClickHandler(event:MouseEvent):void
+			{
+				close();
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<views:ImageLoader id="imageLoader" width="100%" height="100%" imageLoaded="imageLoader_imageLoadedHandler(event)"/>
+</s:TitleWindow>

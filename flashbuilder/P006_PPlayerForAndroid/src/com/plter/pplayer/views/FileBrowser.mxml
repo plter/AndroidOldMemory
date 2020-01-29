@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" 
+		creationComplete="view1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.plter.pplayer.config.SOManager;
+			import com.plter.pplayer.file.NFile;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			
+			import spark.events.IndexChangeEvent;
+			
+			[Bindable]
+			private var listData:ArrayCollection=new ArrayCollection;
+			
+			private var currentDir:File;
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				if (data) 
+				{
+					currentDir=new File(String(data));
+					SOManager.lastOpenPath=String(data);
+				}else{
+					currentDir=new File(SOManager.lastOpenPath);
+				}
+				
+				title=currentDir.nativePath;
+				
+				if (currentDir.exists&&currentDir.isDirectory)
+				{
+					var arr:Array=currentDir.getDirectoryListing();
+					
+					if (currentDir.parent!=null) 
+					{
+						arr.splice(0,0,new NFile(currentDir.parent,true));
+					}
+					
+					listData.source=arr;
+				}
+			}
+			
+			protected function fileList_changeHandler(event:IndexChangeEvent):void
+			{
+				var file:Object = fileList.selectedItem;
+				if (file&&file.isDirectory) 
+				{
+					navigator.pushView(FileBrowser,file.nativePath);
+				}else if(file.extension!=null){
+					switch(file.extension.toLowerCase())
+					{
+						case "flv":
+						case "f4v":
+						{
+							navigator.pushView(PlayerView,file.url);
+						}
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:List width="100%" height="100%" id="fileList" change="fileList_changeHandler(event)" dataProvider="{listData}" itemRenderer="com.plter.pplayer.views.FileBrowserListItem"/>
+	
+	<s:HGroup bottom="0" verticalAlign="bottom" width="100%">
+		<s:Label width="100%"/>
+		<s:Label text="作者博客：http://plter.sinaapp.com" fontSize="12"/>
+	</s:HGroup>
+</s:View>

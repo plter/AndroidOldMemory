@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx" width="320" height="200" close="titlewindow1_closeHandler(event)" title="图片打水印工具1.1.0517">
+	<s:layout>
+		<s:BasicLayout/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.managers.PopUpManager;
+			protected function closeBtn_clickHandler(event:MouseEvent):void
+			{
+				closeThis();
+			}
+			
+			protected function titlewindow1_closeHandler(event:CloseEvent):void
+			{
+				closeThis();
+			}
+			
+			private function closeThis():void{
+				PopUpManager.removePopUp(this);
+			}
+			
+			private static var __thisClass:AboutWindow;
+			
+			public static function show():void{
+				if(__thisClass==null){
+					__thisClass=new AboutWindow;
+				}
+				PopUpManager.addPopUp(__thisClass,FlexGlobals.topLevelApplication as DisplayObject,true);
+				PopUpManager.centerPopUp(__thisClass);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:Label text="图片打水印工具1.1.0517" left="10" top="10" right="10" textAlign="center" fontWeight="bold" fontSize="18" textDecoration="none"/>
+	<s:Button id="closeBtn" x="124" y="132" label="关闭" click="closeBtn_clickHandler(event)"/>
+	<s:TextArea x="10" y="36" text="　　此工具用于批量为图片添加水印，使用简单，而且不用下载到本地，可直接在线使用。文件打水印完成后会生成一个zip文件，可保存在本地计算机。" width="298" height="78" editable="false" fontFamily="中易宋体" fontSize="14"/>
+</s:TitleWindow>

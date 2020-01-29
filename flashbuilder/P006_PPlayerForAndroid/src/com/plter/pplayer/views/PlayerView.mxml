@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009"
+		xmlns:s="library://ns.adobe.com/flex/spark"
+		xmlns:mx="library://ns.adobe.com/flex/mx"
+		actionBarVisible="false" tabBarVisible="false" 
+		backgroundColor="#000000" xmlns:utils="com.plter.pplayer.utils.*"
+		touchBegin="view1_touchBeginHandler(event)"
+		backKeyPressed="view1_backKeyPressedHandler(event)"
+		touchEnd="view1_touchEndHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.plter.pplayer.utils.TimeUtil;
+			
+			import mx.events.FlexEvent;
+			import mx.events.ResizeEvent;
+			
+			
+			private var video:Video;
+			private var nc:NetConnection;
+			private var ns:NetStream;
+			
+			protected function videoContainer_creationCompleteHandler(event:FlexEvent):void
+			{
+				video=new Video();
+				video.deblocking=5;
+				videoContainer.addChild(video);
+				
+				nc=new NetConnection;
+				nc.addEventListener(NetStatusEvent.NET_STATUS,nc_netStatusHandler);
+				nc.connect(null);
+			}
+			
+			protected function nc_netStatusHandler(event:NetStatusEvent):void
+			{
+				trace(event.info.code);
+				
+				switch(event.info.code)
+				{
+					case "NetConnection.Connect.Success":
+					{
+						ns=new NetStream(nc);
+						video.attachNetStream(ns);
+						ns.client=this;
+						ns.play(data);
+						playing=true;
+						break;
+					}
+						
+					default:
+					{
+						break;
+					}
+				}
+			}
+			
+			private var currentMetaData:Object=null;
+			
+			
+			/**********************Video Call back***************************/
+			public function onMetaData(obj:Object):void{
+				
+				currentMetaData=obj;
+				
+				checkToResizeVideo();
+				
+				
+				trace("<<<<<<<<<<<<<<<<<<<<<<<MetaData>>>>>>>>>>>>>>>>>>>>>>>>");
+				for(var k:String in obj){
+					trace(k+"="+obj[k]);
+				}	
+			}
+			
+			
+			public function onPlayStatus(obj:Object):void{
+				
+				
+				trace("<<<<<<<<<<<<<<<<<<<<<<<PlayStatus>>>>>>>>>>>>>>>>>>>>>>>>");
+				for(var k:String in obj){
+					trace(k+"="+obj[k]);
+				}	
+			}
+			
+			/****************************************************************/
+			
+			protected function videoContainer_resizeHandler(event:ResizeEvent):void
+			{
+				checkToResizeVideo();
+			}
+			
+			
+			private function checkToResizeVideo():void{
+				if (currentMetaData==null||videoContainer==null) 
+				{
+					return;
+				}
+				
+				video.width=videoContainer.width;
+				video.height=video.width/currentMetaData.width*currentMetaData.height;
+				
+				if (video.height>videoContainer.height) 
+				{
+					video.height=videoContainer.height;
+					video.width=video.height/currentMetaData.height*currentMetaData.width;
+				}
+				
+				video.x=(videoContainer.width-video.width)/2;
+				video.y=(videoContainer.height-video.height)/2;
+			}
+			
+			
+			private var _playing:Boolean=false;
+
+			public function get playing():Boolean
+			{
+				return _playing;
+			}
+
+			public function set playing(value:Boolean):void
+			{
+				_playing = value;
+				
+				if (value) 
+				{
+					if (!getPlayTimeTimer.running) 
+					{
+						getPlayTimeTimer.start();
+					}
+					
+					NativeApplication.nativeApplication.systemIdleMode=SystemIdleMode.KEEP_AWAKE;
+				}else{
+					getPlayTimeTimer.stop();
+					
+					NativeApplication.nativeApplication.systemIdleMode=SystemIdleMode.NORMAL;
+				}
+			}
+
+			
+			protected function timer_timerHandler(event:TimerEvent):void
+			{
+				if (ns==null||currentMetaData==null) 
+				{
+					return;
+				}
+				
+				if (!sliderChanging) 
+				{
+					slider.value=int(ns.time/currentMetaData.lasttimestamp*slider.maximum);	
+					showPlayTime(ns.time);
+				}
+			}
+			
+			protected function slider_changeStartHandler(event:FlexEvent):void
+			{
+				sliderChanging=true;
+			}
+			
+			protected function slider_changeHandler(event:Event):void
+			{
+				if (currentMetaData==null) 
+				{
+					return;
+				}
+				
+				currentSeekTime= (slider.value/slider.maximum)*currentMetaData.lasttimestamp;
+				showPlayTime(currentSeekTime);
+			}
+			
+			protected function slider_changeEndHandler(event:FlexEvent):void
+			{
+				sliderChanging=false;
+				
+				ns.seek(currentSeekTime);
+			}
+			
+			/**
+			 * 此组件的位置是否正在发现改变
+			 */
+			private var sliderChanging:Boolean=false;
+			private var currentSeekTime:int=0;
+			
+			
+			private function showPlayTime(value:int):void{
+				var sec:int=value%60;
+				var min:int=(value/60)%60;
+				var hour:int=(value/60/60)%100;
+				
+				timeLabel.text=TimeUtil.timeFormat(hour)+":"+TimeUtil.timeFormat(min)+":"+TimeUtil.timeFormat(sec);
+			}
+			
+			protected function hidePlayBarControlTimer_timerCompleteHandler(event:TimerEvent):void
+			{
+				playBarControl.visible=false;
+			}
+			
+			protected function view1_touchBeginHandler(event:TouchEvent):void
+			{
+				playBarControl.visible=true;
+				
+				hidePlayBarControlTimer.reset();
+			}
+			
+			protected function view1_touchEndHandler(event:TouchEvent):void
+			{
+				hidePlayBarControlTimer.start();
+			}
+			
+			protected function view1_backKeyPressedHandler(event:FlexEvent):void
+			{
+				video.attachNetStream(null);
+				ns.close();
+				nc.close();
+				currentMetaData=null;
+				currentSeekTime=0;
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<utils:GetPlayTimeTimer id="getPlayTimeTimer" timer="timer_timerHandler(event)"/>
+		<utils:HidePlayBarControlTimer id="hidePlayBarControlTimer" timerComplete="hidePlayBarControlTimer_timerCompleteHandler(event)"/>
+	</fx:Declarations>
+	
+	<mx:UIComponent width="100%" height="100%" id="videoContainer" resize="videoContainer_resizeHandler(event)" creationComplete="videoContainer_creationCompleteHandler(event)"/>
+	<s:VGroup width="100%" bottom="10" horizontalAlign="center" id="playBarControl">
+		<s:Label text="00:00:00" id="timeLabel" fontSize="30" color="#FFFFFF"/>
+		<s:HSlider width="90%" id="slider" minimum="0" maximum="1000" showDataTip="false" change="slider_changeHandler(event)" changeStart="slider_changeStartHandler(event)" changeEnd="slider_changeEndHandler(event)"/>
+	</s:VGroup>
+</s:View>

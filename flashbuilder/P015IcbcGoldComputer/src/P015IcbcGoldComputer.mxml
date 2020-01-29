@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" 
+			   xmlns:s="library://ns.adobe.com/flex/spark" 
+			   xmlns:mx="library://ns.adobe.com/flex/mx"
+			   fontSize="14" fontFamily="宋体">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			
+			private var txtFileFilters:Array = [new FileFilter("*.txt","*.txt")];
+			
+			private var _fileTradeListTxtFile:FileReference=null;
+			
+			protected function btnSelectTradeListTxtFile_clickHandler(event:MouseEvent):void
+			{
+				fileTradeListTxtFile.browse(txtFileFilters);
+			}
+			
+			public function get fileTradeListTxtFile():FileReference
+			{
+				if (_fileTradeListTxtFile==null) 
+				{
+					_fileTradeListTxtFile = new FileReference;
+					_fileTradeListTxtFile.addEventListener(Event.SELECT,_fileTradeListTxtFile_selectHandler);
+					_fileTradeListTxtFile.addEventListener(Event.COMPLETE,_fileTradeListTxtFile_completeHandler);
+				}
+				return _fileTradeListTxtFile;
+			}
+			
+			protected function _fileTradeListTxtFile_selectHandler(event:Event):void
+			{
+				fileTradeListTxtFile.load();
+			}
+			
+			protected function _fileTradeListTxtFile_completeHandler(event:Event):void
+			{
+				var bytes:ByteArray = fileTradeListTxtFile.data;
+				
+				bytes.position=0;
+				var s:String = bytes.readMultiByte(bytes.bytesAvailable,"gbk");
+				
+				readTradeList(s);
+			}
+			
+			
+			private function readTradeList(fileContent:String):void{
+				
+				var startIndex:int = fileContent.indexOf("\n",fileContent.indexOf("交易日期"))+1;
+				var tradeListString:String = fileContent.substr(startIndex);
+				
+				var tradeList:Array = tradeListString.split("\n");
+				var win:Number = 0;
+				var tradeListLine:String;
+				var dotIndex:int=0;
+				var praceStr:String;
+				var prace:Number=0;
+				var goldNum:Number=0;
+				var goldNumStr:String;
+				var goldPracePerG:Number=0;
+				var goldPracePerGStr:String;
+				var tmpPosition:int=0;
+				var i:int=0;
+				
+				if (tradeListString.indexOf("卖出开仓")>-1||tradeListString.indexOf("买入平仓")>-1) 
+				{
+					for (i = 0; i < tradeList.length; i++) 
+					{
+						tradeListLine = tradeList[i];
+						
+						if (tradeListLine.indexOf("买入")>-1) 
+						{
+							
+							tmpPosition = tradeListLine.lastIndexOf("克");
+							goldNumStr = tradeListLine.substring(tradeListLine.lastIndexOf(" ",tmpPosition),tmpPosition);
+							goldNumStr = goldNumStr.replace(/,/g,"");
+							goldNum = Number(goldNumStr);
+							
+							tmpPosition = tradeListLine.lastIndexOf("元/克");
+							goldPracePerGStr = tradeListLine.substring(tradeListLine.lastIndexOf(" ",tmpPosition),tmpPosition);
+							goldPracePerGStr = goldPracePerGStr.replace(/,/g,"");
+							goldPracePerG = Number(goldPracePerGStr);
+							
+							prace = goldNum*goldPracePerG;
+							
+							
+							win -= prace;
+						}else if (tradeListLine.indexOf("卖出")>-1) 
+						{
+							tmpPosition = tradeListLine.lastIndexOf("克");
+							goldNumStr = tradeListLine.substring(tradeListLine.lastIndexOf(" ",tmpPosition),tmpPosition);
+							goldNumStr = goldNumStr.replace(/,/g,"");
+							goldNum = Number(goldNumStr);
+							
+							tmpPosition = tradeListLine.lastIndexOf("元/克");
+							goldPracePerGStr = tradeListLine.substring(tradeListLine.lastIndexOf(" ",tmpPosition),tmpPosition);
+							goldPracePerGStr = goldPracePerGStr.replace(/,/g,"");
+							goldPracePerG = Number(goldPracePerGStr);
+							
+							prace = goldNum*goldPracePerG;
+							
+							
+							win += prace;
+						}else{
+							continue;
+						}
+					}
+					
+				}else{
+					for (i = 0; i < tradeList.length; i++) 
+					{
+						tradeListLine = tradeList[i];
+						
+						if (tradeListLine.indexOf("买入")>-1) 
+						{
+							dotIndex = tradeListLine.lastIndexOf(".");
+							praceStr = tradeListLine.substring(tradeListLine.lastIndexOf(" ",dotIndex),tradeListLine.indexOf(" ",dotIndex));
+							praceStr = praceStr.replace(/,/g,"");
+							prace = Number(praceStr);
+							win -= prace;
+						}else if (tradeListLine.indexOf("卖出")>-1) 
+						{
+							dotIndex = tradeListLine.lastIndexOf(".");
+							praceStr = tradeListLine.substring(tradeListLine.lastIndexOf(" ",dotIndex),tradeListLine.indexOf(" ",dotIndex));
+							praceStr = praceStr.replace(/,/g,"");
+							prace = Number(praceStr);
+							win += prace;
+						}else{
+							continue;
+						}
+					}
+				}
+				
+				taResult.text = "赢利："+win.toFixed(2);
+			}
+			
+			protected function btnWeibo_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("http://weibo.com/plter"),"_blank");
+			}
+			
+			protected function btnBlog_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("http://blog.plter.com"),"_blank");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<s:layout>
+		<s:VerticalLayout paddingBottom="10" paddingLeft="10" paddingRight="10" paddingTop="10"/>
+	</s:layout>
+	
+	<s:Label width="100%" textAlign="center" text="工行贵金属交易历史赢利快速计算器" fontSize="16" fontWeight="bold"/>
+	<s:HGroup width="100%">
+		<s:Button label="选择贵金属交易明细文件(*.txt)" id="btnSelectTradeListTxtFile" click="btnSelectTradeListTxtFile_clickHandler(event)"/>
+		<mx:Text selectable="false" color="#ff0000" text="说明：该软件仅仅是根据卖出和买入的数据来计算的，所以只有的完全平仓的情况下所得的结果才是正确的" width="100%"/>
+	</s:HGroup>
+	<s:Label text="分析结果"/>
+	<s:TextArea width="100%" height="100%" id="taResult" editable="false"/>
+	<s:HGroup width="100%">
+		<mx:LinkButton label="作者博客：blog.plter.com" id="btnBlog" click="btnBlog_clickHandler(event)"/>
+		<mx:LinkButton label="作者微博：weibo.com/plter" id="btnWeibo" click="btnWeibo_clickHandler(event)"/>
+	</s:HGroup>
+</s:Application>

@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:IconItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					xmlns:s="library://ns.adobe.com/flex/spark"  
+					labelField="name" iconWidth="32" iconHeight="32" 
+					iconFunction="myIconFunction">
+	<fx:Script>
+		<![CDATA[
+			import com.plter.pplayer.file.NFile;
+			
+			
+			[Embed(source="assets/dir.png")]
+			private static var DirIconClass:Class;
+			
+			[Embed(source="assets/file.png")]
+			private static var FileIconClass:Class;
+			
+			[Embed(source="assets/document_f4v.png")]
+			private static var F4vIconClass:Class;
+			
+			[Embed(source="assets/document_flv.png")]
+			private static var FlvIconClass:Class;
+			
+			[Embed(source="assets/parent.png")]
+			private static var ParentDirIconClass:Class;
+			
+			
+			private function myIconFunction(obj:Object):Object{
+				
+				if (data.isDirectory) 
+				{
+					if (data is NFile&&NFile(data).isParent) 
+					{
+						return ParentDirIconClass;	
+					}else{
+						return DirIconClass;
+					}
+					
+				}else if(data.extension!=null){
+					switch(data.extension.toLowerCase())
+					{
+						case "flv":
+							return FlvIconClass;
+						case "f4v":
+							return F4vIconClass;
+						default:
+							return FileIconClass;
+					}
+				}else{
+					return FileIconClass;
+				}
+				
+				return null;
+			}
+			
+		]]>
+	</fx:Script>
+</s:IconItemRenderer>

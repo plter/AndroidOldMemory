@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Window xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" 
+		  maximizable="false" minimizable="false" resizable="false"
+		  alwaysInFront="true" showStatusBar="false"
+		  width="350" height="180" close="window1_closeHandler(event)">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			
+			
+			private static var __aboutWindow:AboutWindow=null;
+			
+			public static function show():void{
+				if (__aboutWindow==null) 
+				{
+					__aboutWindow=new AboutWindow;
+					__aboutWindow.open();
+				}
+			}
+			
+			
+			
+			protected function window1_closeHandler(event:Event):void
+			{
+				__aboutWindow=null;
+			}
+			
+			[Bindable]
+			private var contentTxt:String="    本软件是一个简单的记事本工具，能够快速记录自己的灵感。目前本软件支持的平台有Mac OS X，Windows，Android<br>" +
+				"作者微博：<font color=\"#0000FF\"><a href=\"http://weibo.com/plter\">http://weibo.com/plter</a></font><br>" +
+				"作者博客：<font color=\"#0000FF\"><a href=\"http://plter.sinaapp.com\">http://plter.sinaapp.com</a></font>";
+			
+			protected function closeBtn_clickHandler(event:MouseEvent):void
+			{
+				close();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:layout>
+		<s:VerticalLayout horizontalAlign="center"/>
+	</s:layout>
+	
+	<s:Label width="100%" textAlign="center" fontSize="18" text="记事本" paddingTop="10"/>
+	<mx:Text width="80%" height="100%" fontSize="12" htmlText="{contentTxt}"/>
+	<s:Group width="100%" height="30">
+		<s:Rect width="100%" height="100%">
+			<s:fill>
+				<s:SolidColor color="#CCCCCC"/>
+			</s:fill>
+		</s:Rect>
+		
+		<s:HGroup horizontalAlign="right" verticalAlign="middle" width="100%" height="100%" right="10">
+			<s:Button id="closeBtn" label="关闭" click="closeBtn_clickHandler(event)"/>
+		</s:HGroup>
+	</s:Group>
+</s:Window>

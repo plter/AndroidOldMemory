@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				layout="absolute" fontSize="16" 
+				verticalScrollPolicy="off" horizontalScrollPolicy="off"
+				backgroundColor="#FFFFFF">
+	
+	<mx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			
+			import mx.events.EffectEvent;
+			protected function seeResultBtn_clickHandler(event:MouseEvent):void
+			{
+				for (var i:int = 1; i <= 11; i++) 
+				{
+					if(this["txt"+i].text==""){
+						alertLabel.text="请在"+i+"处的文本框填写内容";
+						return;
+					}
+					
+					alertLabel.text="";
+				}
+				
+				showResultBox();
+			}
+			
+			protected function backBtn_clickHandler(event:MouseEvent):void
+			{
+				hideResultBox();
+			}
+			
+			
+			private function showResultBox():void{
+				resultTxt.text=txt3.text+"是你所爱的人\n" +
+					txt7.text+"是你喜欢但不能与之相伴的人\n" +
+					txt4.text+"是你最关心的人\n" +
+					txt5.text+"是非常了解你的人\n" +
+					txt6.text+"是你的幸运之星\n"+
+					"歌曲《"+txt8.text+"》适合"+txt3.text+"\n" +
+					"歌曲《"+txt9.text+"》适合"+txt7.text+"\n" +
+					"歌曲《"+txt10.text+"》代表你的看法\n" +
+					"歌曲《"+txt11.text+"》是你的生活感受\n" +
+					"\n" +
+					"最后：\n";
+				
+				var i:int=int(txt2.text);
+				
+				if (i>=3&&i<=7) 
+				{
+					resultTxt.text+="请把这个游戏告诉"+this["txt"+int(txt2.text)].text;
+				}else{
+					resultTxt.text+="请你把这个秘密永远藏在心底，你是一个守得住秘密的人";
+				}
+				
+				moveInEff.play();
+			}
+			
+			private function hideResultBox():void{
+				moveInEff.play(null,true);
+			}
+			
+			protected function txt1_changeHandler(event:Event):void
+			{
+				var value:int=int(txt1.text);
+				
+				if (value>11) 
+				{
+					txt1.text="11";
+				}
+				if (value<1) 
+				{
+					txt1.text="";
+				}
+				
+			}
+			
+			protected function txt2_changeHandler(event:Event):void
+			{
+				var value:int=int(txt2.text);
+				
+				if (value>11) 
+				{
+					txt2.text="11";
+				}
+				if (value<1) 
+				{
+					txt2.text="";
+				}
+			}
+			
+			protected function plterWebSiteBtn_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("http://plter.sinaapp.com"),"_blank");
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox width="100%" height="100%" left="10" right="10">
+		<mx:HBox width="100%">
+			<mx:Label text="按照以下说明，用3分钟完成，不要作弊，否则你的希望会落空" width="100%"/>
+			<mx:LinkButton id="plterWebSiteBtn" label="http://plter.sinaapp.com" fontSize="12" click="plterWebSiteBtn_clickHandler(event)"/>
+		</mx:HBox>
+		
+		<mx:Label fontSize="12" color="#FF0000" id="alertLabel"/>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="1"/>
+			<mx:TextInput width="200" restrict="0-9" text="" id="txt1" maxChars="2" change="txt1_changeHandler(event)"/>
+			<mx:Label text="这里填写1-11之间的(包括1和11)数字"/>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="2"/>
+			<mx:TextInput width="200" restrict="0-9" text="" id="txt2" maxChars="2" change="txt2_changeHandler(event)"/>
+			<mx:Label text="这里填写1-11之间的(包括1和11)数字"/>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="3"/>
+			<mx:TextInput width="200"  text="" id="txt3"/>
+			<mx:VBox>
+				<mx:Label text="这里写下一个异性的名字"/>
+				<mx:Label text="当你选择人名时，保证是你认识的，并且完全是第一感觉" color="#FF0000" fontSize="12"/>
+			</mx:VBox>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="4"/>
+			<mx:TextInput width="200"  text="" id="txt4"/>
+			<mx:Label text="这里写下一个朋友或亲人的名字"/>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="5"/>
+			<mx:TextInput width="200" text="" id="txt5"/>
+			<mx:Label text="这里写下一个朋友或亲人的名字"/>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="6"/>
+			<mx:TextInput width="200"  text="" id="txt6"/>
+			<mx:Label text="这里写下一个朋友或亲人的名字"/>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="7"/>
+			<mx:TextInput width="200"  text="" id="txt7"/>
+			<mx:VBox>
+				<mx:Label text="这里写下一个异性的名字"/>
+				<mx:Label text="当你选择人名时，保证是你认识的，并且完全是第一感觉" color="#FF0000" fontSize="12"/>
+			</mx:VBox>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="8"/>
+			<mx:TextInput width="200" text="" id="txt8"/>
+			<mx:Label text="这里写下一个歌曲名字"/>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="9"/>
+			<mx:TextInput width="200" text="" id="txt9"/>
+			<mx:Label text="这里写下一个歌曲名字"/>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox>
+			<mx:Label text="10"/>
+			<mx:TextInput width="200" text="" id="txt10"/>
+			<mx:Label text="这里写下一个歌曲名字"/>
+		</mx:HBox>
+		<mx:HRule width="500"/>
+		<mx:HBox width="100%">
+			<mx:Label text="11"/>
+			<mx:TextInput width="200" text="" id="txt11"/>
+			<mx:Label text="这里写下一个歌曲名字"/>
+			<mx:Label width="100%"/>
+			<mx:Button label="查看结果" id="seeResultBtn" click="seeResultBtn_clickHandler(event)"/>
+		</mx:HBox>
+	</mx:VBox>
+	
+	
+	<mx:Move xFrom="{width}" xTo="0" duration="350" id="moveInEff" target="{resultBox}"/>
+	
+	<mx:VBox x="{width}" width="100%" height="100%" id="resultBox" backgroundColor="#FFFFFF" backgroundAlpha="0.95"
+			 paddingLeft="10" paddingTop="10" paddingBottom="10" paddingRight="10">
+		<mx:Canvas width="100%" height="100%" horizontalScrollPolicy="off" verticalScrollPolicy="off">
+			<mx:Text id="resultTxt"/>
+		</mx:Canvas>
+		
+		<mx:HBox width="100%" horizontalAlign="right">
+			<mx:Button label="返回" id="backBtn" click="backBtn_clickHandler(event)"/>
+		</mx:HBox>
+		
+	</mx:VBox>
+</mx:Application>

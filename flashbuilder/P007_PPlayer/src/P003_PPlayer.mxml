@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx" 
+					   showStatusBar="false" 
+					   creationComplete="windowedapplication1_creationCompleteHandler(event)"
+					   invoke="windowedapplication1_invokeHandler(event)"
+					   nativeDragEnter="windowedapplication1_nativeDragEnterHandler(event)"
+					   nativeDragDrop="windowedapplication1_nativeDragDropHandler(event)"
+					   doubleClickEnabled="true">
+	<fx:Script>
+		<![CDATA[
+			import mx.controls.Alert;
+			import mx.events.FlexEvent;
+			
+			import org.osmf.events.MediaPlayerStateChangeEvent;
+			
+			
+			[Bindable]
+			private var videoUrl:String="";
+			
+			private var videoFile:File;
+			
+			protected function videoPlayer_creationCompleteHandler(event:FlexEvent):void
+			{
+				resizeVideoPlayerByStage();
+			}
+			
+			
+			private function resizeVideoPlayerByStage():void{
+				videoPlayer.width=systemManager.stage.stageWidth;
+				videoPlayer.height=systemManager.stage.stageHeight;
+			}
+			
+			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
+			{
+				systemManager.stage.addEventListener(Event.RESIZE,stage_resizeHandler);
+			}
+			
+			protected function stage_resizeHandler(event:Event):void
+			{
+				resizeVideoPlayerByStage();
+				
+				resetVideoStatus();
+			}
+			
+			protected function windowedapplication1_invokeHandler(event:InvokeEvent):void
+			{
+				
+				if (event.arguments!=null&&event.arguments.length>0) 
+				{
+					videoFile=new File(encodeURI("file://"+event.arguments[0]));
+					if (videoFile.exists) 
+					{
+						playVideoFile(videoFile);
+					}else{
+						Alert.show("找不到文件 "+videoFile.url);
+					}
+				}
+			}
+			
+			
+			/**
+			 * 播放视频文件
+			 */
+			private function playVideoFile(file:File):void{
+				videoUrl=file.url;
+				title=file.name;
+			}
+			
+			
+			/**
+			 * 判断一个文件是否为视频文件
+			 */
+			private function isFileAVideo(f:File):Boolean{
+				switch(f.extension.toLowerCase())
+				{
+					case "flv":
+					case "f4v":
+						return true;
+					default:
+						return false;
+				}
+			}
+			
+			protected function windowedapplication1_nativeDragEnterHandler(event:NativeDragEvent):void
+			{
+				
+				var files:Array=event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+				if (files!=null&&files.length>0&&isFileAVideo(files[0])) 
+				{
+					NativeDragManager.acceptDragDrop(this);
+				}
+			}
+			
+			protected function windowedapplication1_nativeDragDropHandler(event:NativeDragEvent):void
+			{
+				var files:Array=event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+				playVideoFile(files[0]);
+			}
+			
+			
+			/**
+			 * 重置相关播放状态
+			 */
+			private function resetVideoStatus():void{
+				
+				if (videoPlayer.videoObject!=null) 
+				{
+					videoPlayer.videoObject.smoothing=true;
+					videoPlayer.videoObject.deblocking=5;
+				}
+			}
+			
+			protected function videoPlayer_mediaPlayerStateChangeHandler(event:MediaPlayerStateChangeEvent):void
+			{
+				resetVideoStatus();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:VideoPlayer id="videoPlayer" 
+				   source="{videoUrl}" 
+				   mediaPlayerStateChange="videoPlayer_mediaPlayerStateChangeHandler(event)"
+				   creationComplete="videoPlayer_creationCompleteHandler(event)"/>
+	
+</s:WindowedApplication>

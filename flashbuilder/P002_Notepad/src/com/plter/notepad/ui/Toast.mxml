@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Label xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 fontSize="14"
+		 backgroundColor="#555555" color="#EEEEEE" paddingLeft="10" paddingTop="5" paddingRight="10" paddingBottom="5">
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.utils.setTimeout;
+			
+			import mx.core.FlexGlobals;
+			import mx.managers.PopUpManager;
+			public static function make(message:String):Toast{
+				
+				var t:Toast=new Toast;
+				t.text=message;
+				
+				return t;
+			}
+			
+			
+			public function show():void{
+				PopUpManager.addPopUp(this,FlexGlobals.topLevelApplication as DisplayObject);
+				PopUpManager.centerPopUp(this);
+				
+				setTimeout(removeToast,3000);
+			}
+			
+			private function removeToast():void
+			{
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+</s:Label>

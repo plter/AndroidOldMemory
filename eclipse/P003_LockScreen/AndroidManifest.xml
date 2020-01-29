@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+      package="com.plter.lockscreen"
+      android:versionCode="1"
+      android:versionName="1.0" android:installLocation="internalOnly">
+    <uses-sdk android:minSdkVersion="8" />
+    <uses-permission android:name="android.permission.WAKE_LOCK"></uses-permission>
+
+    <application android:label="@string/app_name"
+                  android:icon="@drawable/lockconfig_icon">
+    
+    	<activity android:name=".LockConfigAty"
+                  android:label="@string/configLockScreen"
+                  android:icon="@drawable/lockconfig_icon"
+                  android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+    
+        <activity android:name=".LockScreenAty"
+                  android:label="@string/lockScreen"
+                  android:icon="@drawable/lockscreen_icon"
+                  android:launchMode="singleInstance">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        
+         <!-- 设备管理器 -->
+        <receiver android:name=".recv.PDeveceAdminReceiver"
+        			android:permission="android.permission.BIND_DEVICE_ADMIN">
+        	
+        	<meta-data android:name="android.app.device_admin"
+                       android:resource="@xml/device_admin" />
+        	
+        	<intent-filter>
+        		<action android:name="android.app.action.DEVICE_ADMIN_ENABLED"/>
+        	</intent-filter>
+        </receiver>
+        
+        <!-- 距离感应服务 -->
+		<service android:name=".services.ProximityService" android:process=":ProximityService">
+			<intent-filter>
+				<action android:name="com.plter.lockscreen.intent.action.services.ProximityService"></action>
+			</intent-filter>
+		</service>
+		
+		<!-- 开机启动接收器 -->
+        <receiver android:name=".recv.BootCompleteReceiver">
+        	<intent-filter>
+        		<action android:name="android.intent.action.BOOT_COMPLETED"></action>
+        		<category android:name="android.intent.category.HOME"/>
+        	</intent-filter>
+        </receiver>
+    </application>
+</manifest>

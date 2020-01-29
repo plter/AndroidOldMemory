@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   xmlns:ui="com.plter.notepad.ui.*"
+					   width="320" height="520" 
+					   showStatusBar="false" backgroundColor="#000000"
+					   fontSize="18" title="记事本"
+					   invoke="windowedapplication1_invokeHandler(event)"
+					   creationComplete="windowedapplication1_creationCompleteHandler(event)"
+					   nativeDragEnter="windowedapplication1_nativeDragEnterHandler(event)"
+					   nativeDragDrop="windowedapplication1_nativeDragDropHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.plter.notepad.CommandLine;
+			import com.plter.notepad.Config;
+			import com.plter.notepad.data.NotesImporter;
+			import com.plter.notepad.ui.MenuBuilder;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			
+			protected function windowedapplication1_creationCompleteHandler(event:FlexEvent):void
+			{
+				if (NativeWindow.supportsMenu) 
+				{
+					nativeWindow.menu=MenuBuilder.getMenu();
+				}
+				if (NativeApplication.supportsMenu) 
+				{
+					NativeApplication.nativeApplication.menu=MenuBuilder.getMenu();
+				}
+			}
+			
+			protected function windowedapplication1_invokeHandler(event:InvokeEvent):void
+			{
+				
+				if (event.arguments!=null&&event.arguments.length>0) 
+				{
+					CommandLine.commandLineArg=event.arguments[0];
+					
+					if (CommandLine.commandLineArg!=null&&CommandLine.commandLineArg!="") 
+					{
+						var file:File=new File("file://"+CommandLine.commandLineArg);
+						
+						if (file.exists&&file.extension.toLowerCase()==Config.NOTES_TYPE) 
+						{
+							Alert.show("您确定要导入文件 "+file.name+" 吗？","请问",Alert.YES|Alert.NO,null,function(e:CloseEvent):void{
+								if (e.detail==Alert.YES) 
+								{
+									NotesImporter.importNotes(file);
+								}
+							});
+						}
+					}
+				}
+			}
+			
+			protected function windowedapplication1_nativeDragEnterHandler(event:NativeDragEvent):void
+			{
+				var files:Array=event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+				if (files!=null&&files.length>0) 
+				{
+					var f:File=files[0];
+					if (Config.isNotesFile(f)) 
+					{
+						NativeDragManager.acceptDragDrop(this);
+					}
+				}
+			}
+			
+			protected function windowedapplication1_nativeDragDropHandler(event:NativeDragEvent):void
+			{
+				var files:Array=event.clipboard.getData(ClipboardFormats.FILE_LIST_FORMAT) as Array;
+				if (files!=null&&files.length>0) 
+				{
+					var f:File=files[0];
+					if (Config.isNotesFile(f)) 
+					{
+						NotesImporter.importNotes(f);
+					}
+				}
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	
+	<ui:AppMainContainer id="appMainContainer"/>
+	
+	
+</s:WindowedApplication>

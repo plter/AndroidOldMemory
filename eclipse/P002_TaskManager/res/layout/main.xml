@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+    <Button
+        android:id="@+id/killProcessesBtn"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="关闭所选进程" >
+    </Button>
+
+    <ListView
+        android:id="@+id/processesList"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_weight="1" >
+    </ListView>
+
+    <TextView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:text="plter.sinaapp.com" />
+    <!-- 广告View ********************************* -->
+
+    <com.tencent.mobwin.AdView
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content" >
+    </com.tencent.mobwin.AdView>
+    <!-- ****************************************** -->
+</LinearLayout>

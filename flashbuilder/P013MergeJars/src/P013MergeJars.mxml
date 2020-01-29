@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   title="合并jar文件" width="500" height="300"
+					   showStatusBar="false">
+	
+	<fx:Script>
+		<![CDATA[
+			import nochump.util.zip.ZipEntry;
+			import nochump.util.zip.ZipFile;
+			import nochump.util.zip.ZipOutput;
+			protected function btnAddJar_clickHandler(event:MouseEvent):void
+			{
+				var f:File=new File;
+				f.addEventListener(Event.SELECT,function(e:Event):void{
+					taJarList.appendText(f.url+"\n");
+				},false,0,true);
+				f.browseForOpen("选择jar文件",types);
+			}
+			
+			protected function btnMergeAndSave_clickHandler(event:MouseEvent):void
+			{
+				var fileUrls:Array=taJarList.text.split("\n");
+				var url:String=null;
+				var file:File=null;
+				var stream:FileStream=null;
+				var bytes:ByteArray=null;
+				var zip:ZipFile=null;
+				var output:ZipOutput=new ZipOutput;
+				var entry:ZipEntry=null;
+				
+				for (var i:int = 0; i < fileUrls.length; i++) 
+				{
+					url=fileUrls[i];
+					
+					if (url!=null&&url!="") 
+					{
+						file=new File(url);
+						if (file.exists) 
+						{
+							stream=new FileStream;
+							stream.open(file,FileMode.READ);
+							bytes=new ByteArray;
+							stream.readBytes(bytes);
+							stream.close();
+							
+							zip=new ZipFile(bytes);
+							
+							for (var j:int = 0; j < zip.entries.length; j++) 
+							{
+								entry=zip.entries[j];								
+								if (entry.name!="META-INF/MANIFEST.MF"&&!entry.isDirectory()) 
+								{
+									output.putNextEntry(new ZipEntry(entry.name));
+									output.write(zip.getInput(entry));
+									output.closeEntry();
+								}
+							}
+						}
+					}
+				}
+				
+				if (output.size>0) 
+				{
+					output.finish();
+					new File().save(output.byteArray,outputFileName.text);
+				}
+			}
+			
+			
+			private const types:Array=[new FileFilter("jar","*.jar")];
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:VGroup left="10" top="10" right="10" bottom="10">
+		<s:HGroup verticalAlign="middle">
+			<s:Button label="添加jar文件" id="btnAddJar" click="btnAddJar_clickHandler(event)"/>
+			<s:Button label="合并保存jar文件" id="btnMergeAndSave" click="btnMergeAndSave_clickHandler(event)"/>
+			<s:Label text="输出文件名："/>
+			<s:TextInput width="150" id="outputFileName" text="output.jar"/>
+		</s:HGroup>
+		
+		<s:TextArea width="100%" height="100%" id="taJarList"/>
+	</s:VGroup>
+</s:WindowedApplication>

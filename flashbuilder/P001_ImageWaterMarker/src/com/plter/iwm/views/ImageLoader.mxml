@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:UIComponent xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx" xmlns:display="com.plter.iwm.flash.display.*" creationComplete="uicomponent1_creationCompleteHandler(event)">
+	
+	<fx:Metadata>
+		[Event(name="imageLoaded",type="com.plter.iwm.views.ImageBrowerEvent")]
+	</fx:Metadata>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.events.FlexEvent;
+			
+			private var _loader:Loader;
+			
+			protected function uicomponent1_creationCompleteHandler(event:FlexEvent):void
+			{
+				initLoader();
+				addChild(_loader);
+			}
+			
+			public function load(req:URLRequest):void
+			{
+				initLoader();
+				_loader.unloadAndStop(true);
+				
+				_loader.load(req);
+			}
+			
+			public function loadBytes(bytes:ByteArray):void
+			{
+				initLoader();
+				_loader.unloadAndStop();
+				
+				_loader.loadBytes(bytes);
+			}
+			
+			public function unloadAndStop():void{
+				_loader.unloadAndStop();
+			}
+			
+			public function getContent():DisplayObject{
+				return _loader.content;
+			}
+			
+			public function centerContent():void{
+				_loader.x=(this.width - _loader.width) / 2;
+				_loader.y=(this.height - _loader.height) / 2;
+			}
+			
+			private function initLoader():void
+			{
+				if (_loader == null)
+				{
+					_loader=new Loader;
+					_loader.contentLoaderInfo.addEventListener(Event.COMPLETE, loadedHandler);
+					_loader.contentLoaderInfo.addEventListener(IOErrorEvent.IO_ERROR, ioErrorHandler);
+				}
+			}
+			
+			private function loadedHandler(event:Event):void
+			{
+				var maxWidth:int=systemManager.stage.stageWidth-50;
+				var maxHeight:int=systemManager.stage.stageHeight-50;
+				
+				if (_loader.content.width > maxWidth)
+				{
+					_loader.content.width=maxWidth;
+					_loader.content.scaleY=_loader.content.scaleX;
+				}
+				if (_loader.content.height > maxHeight)
+				{
+					_loader.content.height=maxHeight;
+					_loader.content.scaleX=_loader.content.scaleY;
+				}
+				
+				dispatchEvent(new ImageBrowerEvent(ImageBrowerEvent.IMAGE_LOADED));
+			}
+			
+			private function ioErrorHandler(event:IOErrorEvent):void
+			{
+				
+			}
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+</mx:UIComponent>

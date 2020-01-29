@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="src" path="gen"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.ANDROID_FRAMEWORK"/>
+	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
+	<classpathentry kind="lib" path="libs/plterlib-android-ext-v2.0.0_beta.jar"/>
+	<classpathentry kind="lib" path="libs/plterlib-android-game2d-v1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/plterlib-common-v1.2.5.jar"/>
+	<classpathentry kind="lib" path="libs/youmi-android_v3.05_2011-12-30.jar"/>
+	<classpathentry kind="output" path="bin/classes"/>
+</classpath>

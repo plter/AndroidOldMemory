@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title></title>
+<link rel="stylesheet"
+	href="../../../lib/js/jquery.mobile-1.1.0.min.css" />
+<link rel="stylesheet" href="my.css" />
+<style>
+/* App custom styles */
+</style>
+<script type="text/javascript" src="../../../lib/js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript"
+	src="../../../lib/js/jquery.mobile-1.1.0.min.js"></script>
+<script type="text/javascript" src="my.js"></script>
+
+<script type="text/javascript">
+function alertObj(obj) {
+	var s = "";
+
+	for ( var k in obj) {
+		s += k + ":" + obj[k] + "\n";
+	}
+
+	alert(s);
+}
+
+var jsonData,contentDiv,currentPageIndex=-1;
+
+
+function moveToTop(){
+	document.documentElement.scrollTop=0;
+    document.body.scrollTop=0;
+}
+
+function loadContent(path) {
+	
+	$.mobile.showPageLoadingMsg("a", "正在加载内容");
+
+	$.get(path, function(data) {
+		$.mobile.hidePageLoadingMsg();
+
+		contentDiv.html(data);
+		contentDiv.trigger("create");
+		
+		moveToTop();
+	}).error(function(){
+		showShortMsg("加载内容失败，请尝试刷新页面");
+	});
+}
+
+
+function genCat(data){
+	
+	var arr = data.chapter;
+	var obj;
+	var catHtml="<div data-role=\"collapsible-set\" data-theme=\"\" data-content-theme=\"\">"+
+					"<div data-role=\"collapsible\" data-collapsed=\"true\">"+
+						"<h3>说明</h3>"+
+						"<div>"+
+							"<div>作者："+data.author.name+"</div>"+
+							"<div>"+data.author.description+"</div><br>"+
+							"<div>软件开发者：<a href=\"http://plter.sinaapp.com\" target=\"_blank\">梦宇</a></div>"+
+						"</div>"+
+					"</div>"+
+					"<div data-role=\"collapsible\" data-collapsed=\"\">"+
+						"<h3>目录</h3>"+
+						"<div>";
+	
+	for(var i=0;i<arr.length;i++){
+		obj=arr[i];
+		
+		catHtml+="<div><a id=\"cat"+i+"\" href=\"#\">"+obj.name+"</a></div>";
+	}
+	
+	catHtml+="</div></div></div>";
+	
+	contentDiv.html(catHtml);
+	contentDiv.trigger("create");
+	
+	moveToTop(); 
+	
+	for(var j=0;j<arr.length;j++){
+		$("#cat"+j).bind("click",j,navTo);
+	}
+}
+
+function checkToLoadCurrentPage(){
+	if(localStorage.currentPageIndex){
+		currentPageIndex=parseInt(localStorage.currentPageIndex);
+	}else{
+		currentPageIndex=-1;
+	}
+		
+	if(currentPageIndex>0){
+		loadCurrentPage();
+	}
+}
+
+
+function navTo(event){
+	currentPageIndex=event.data;
+	
+	loadCurrentPage();
+}
+
+function loadCat() {
+	
+	$.mobile.showPageLoadingMsg("a", "正在加载目录");
+	$.getJSON("main.json", function(data) {
+		$.mobile.hidePageLoadingMsg();
+		
+		jsonData = data;
+
+		$("title").html(data.title);
+		$("#title").html(data.title);
+		//$("#author").html("作者：" + data.author.name);
+		//$("#authorDes").html(data.author.description);
+		
+		genCat(data);
+		
+		checkToLoadCurrentPage();
+	}).error(function() {
+		showShortMsg("加载目录失败，请尝试刷新页面");
+	});
+}
+
+
+function loadCurrentPage(){	
+	localStorage.currentPageIndex=currentPageIndex;
+	loadContent(jsonData.chapter[currentPageIndex].ref);
+}
+
+function preFunc(event){
+	
+	if(jsonData){
+		
+		currentPageIndex--;
+		
+		if(currentPageIndex<=0){
+			currentPageIndex=jsonData.chapter.length-1;
+		}
+		loadCurrentPage();
+	}else{
+		showShortMsg("页面还未初始化");
+	}
+}
+
+function nextFunc(event){	
+	if(jsonData){
+		
+		currentPageIndex++;
+		
+		if(currentPageIndex>jsonData.chapter.length-1){
+			currentPageIndex=0;
+		}
+		loadCurrentPage();
+	}else{
+		showShortMsg("页面还未初始化");
+	}
+}
+
+function catFunc(event){
+	if(jsonData){
+		genCat(jsonData);
+	}else{
+		showShortMsg("页面还未初始化");
+	}
+}
+
+
+function showShortMsg(msg) {
+	$.mobile.showPageLoadingMsg("a", msg, true);
+	setTimeout($.mobile.hidePageLoadingMsg, 3000);
+}
+
+$(document).bind("mobileinit", function() {
+	$.mobile.loadingMessageTextVisible = true;
+});
+
+$(document).ready(function() {
+	contentDiv=$("#contentDiv");
+	$("#aPre").bind("click",preFunc);
+	$("#aNext").bind("click",nextFunc);
+	$("#aCat").bind("click",catFunc);
+	
+	setTimeout(loadCat, 300);
+});
+</script>
+
+</head>
+<body>
+	<!-- Home -->
+	<div data-role="page" id="page1">
+		<div data-theme="a" data-role="header" data-position="fixed">
+			<h3 id="title"></h3>
+			<div data-role="navbar" data-iconpos="top">
+				<ul>
+					<li><a href="#" id="aPre" data-theme="" data-icon="arrow-l">上一回</a></li>
+					<li><a href="#" id="aCat" data-theme="" data-icon="home">目录</a></li>
+					<li><a href="#" id="aNext" data-theme="" data-icon="arrow-r">下一回</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="contentDiv" data-role="content" style="padding: 15px">
+		</div>
+	</div>
+	<script>
+		//App custom javascript
+	</script>
+</body>
+</html>

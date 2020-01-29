@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<fxpProperties abbreviated="false" authoringTool="Flex Builder" compiles="true" parentProject="9b115476-1fbe-49b4-9f1f-96ea6a52ef6e" projectUUID="9b115476-1fbe-49b4-9f1f-96ea6a52ef6e" pureCatalystProject="false" sdkVersion="4.6.0" uuid="4b3a3168-bb3b-4203-b71e-6ece87006509" version="15">
+  <projects/>
+  <src/>
+  <swc>
+    <linked location="sdkPlaceHolder" path="sdkPlaceHolder" position="0" uuid="4b3a3168-bb3b-4203-b71e-6ece87006509"/>
+    <linked location="C:/Documents and Settings/Lenovo/Adobe Flash Builder 4.6/Notepad/libs" path="/libs" position="1" uuid="6ba47536-933b-40c5-b2c9-df34f6ae3ad6"/>
+  </swc>
+  <misc/>
+  <theme/>
+  <mxmlFormattingPrefs groupAttributesByState="true" maxLineWidth="100" mxmlAlignAttributes="true" mxmlAttributeOrder="id,userLabel,includeIn,excludeFrom,visible,x,y,z,left,right,top,bottom,width,height,minWidth,minHeight,maxWidth,maxHeight,label" mxmlKeepAttributeValuesOrganized="true"/>
+</fxpProperties>

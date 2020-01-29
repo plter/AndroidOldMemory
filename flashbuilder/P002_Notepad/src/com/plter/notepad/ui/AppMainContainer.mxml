@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Group xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx"
+		 width="100%" height="100%"
+		 creationComplete="group1_creationCompleteHandler(event)">
+	
+	
+	
+	<fx:Script>
+		<![CDATA[
+			import com.plter.notepad.CommandLine;
+			import com.plter.notepad.Config;
+			import com.plter.notepad.data.DataManager;
+			import com.plter.notepad.data.NotesImporter;
+			import com.plter.notepad.utils.TimeTool;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.EffectEvent;
+			import mx.events.FlexEvent;
+			
+			[Bindable]
+			private var notesAc:ArrayCollection=new ArrayCollection;
+			
+			/**
+			 * 当前正在操作的日记数据对象
+			 */
+			private var currentNoteObject:Object=null;
+			
+			
+			public function showRecto():void{
+				recto.visible=true;
+				verso.visible=false;
+			}
+			
+			
+			public function showVerso():void{
+				recto.visible=false;
+				verso.visible=true;
+			}
+			
+			
+			protected function newNoteBtn_clickHandler(event:MouseEvent):void
+			{
+				titleTxt.text="";
+				contentTxt.text="";
+				currentNoteObject=null;
+				
+				turnToVerso();
+			}
+			
+			protected function cancelBtn_clickHandler(event:MouseEvent):void
+			{
+				turnToRecto();
+			}
+			
+			
+			/**
+			 * 查看指定的note日志内容
+			 */
+			public function viewNote(note:Object):void{
+				titleTxt.text=note.title;
+				contentTxt.text=note.content;
+				currentNoteObject=note;
+				
+				turnToVerso();
+			}
+			
+			
+			/**
+			 * 删除选中的日记
+			 */
+			public function deleteSelectedNote():void{
+				
+				if (notesList.selectedItem) 
+				{
+					if (DataManager.getInstance().notesObject.length>1) 
+					{
+						DataManager.getInstance().notesObject.splice(notesList.selectedIndex,1);
+					}else{
+						DataManager.getInstance().notesObject=[];
+					}
+					DataManager.getInstance().saveNotesObject();
+					
+					refreshNotesList();
+				}
+			}
+			
+			
+			/**
+			 * 删除全部的日记
+			 */
+			public function deleteAllNotes():void{
+				DataManager.getInstance().notesObject=[];
+				DataManager.getInstance().saveNotesObject();
+				
+				refreshNotesList();
+			}
+			
+			
+			
+			/**
+			 * 查看选中的日记
+			 */
+			public function viewSelectedNote():void{
+				if (notesList.selectedItem) 
+				{
+					viewNote(notesList.selectedItem);
+				}
+				
+			}
+			
+			
+			public function turnToRecto():void{
+				if (verso.visible) 
+				{
+					moveFar.zFrom=0;
+					moveFar.zTo=verso.width/2;
+					moveFar.target=verso;
+					moveFar.play();
+				}
+			}
+			
+			
+			public function turnToVerso():void{
+				if (recto.visible) 
+				{
+					moveFar.zFrom=0;
+					moveFar.zTo=recto.width/2;
+					moveFar.target=recto;
+					moveFar.play();
+				}
+			}
+			
+			
+			protected function overFirstHalf_effectEndHandler(event:EffectEvent):void
+			{
+				showVerso();
+				verso.z=moveFar.zTo;
+				
+				overSecondHalf.play();
+			}
+			
+			protected function backFirstHalf_effectEndHandler(event:EffectEvent):void
+			{
+				showRecto();
+				recto.z=moveFar.zTo;
+				
+				backSecondHalf.play();
+			}
+			
+			protected function moveFar_effectEndHandler(event:EffectEvent):void
+			{
+				if (recto.visible) 
+				{
+					recto.z=moveFar.zTo;
+					overFirstHalf.play();
+				}
+				if (verso.visible) 
+				{
+					verso.z=moveFar.zTo;
+					backFirstHalf.play();
+				}
+			}
+			
+			protected function overSecondHalf_effectEndHandler(event:EffectEvent):void
+			{
+				moveNear.zFrom=moveFar.zTo;
+				moveNear.zTo=0;
+				moveNear.target=verso;
+				moveNear.play();
+			}
+			
+			protected function backSecondHalf_effectEndHandler(event:EffectEvent):void
+			{
+				moveNear.zFrom=moveFar.zTo;
+				moveNear.zTo=0;
+				moveNear.target=recto;
+				moveNear.play();
+			}
+			
+			protected function group1_creationCompleteHandler(event:FlexEvent):void
+			{
+				notesList.contextMenu=MenuBuilder.getNotesListContextMenu();
+				notesList.contextMenu.addEventListener(Event.DISPLAYING,notesListMenuDisplayingHandler);
+				
+				refreshNotesList();
+			}
+			
+			protected function saveBtn_clickHandler(event:MouseEvent):void
+			{
+				if (checkTitleAndContent()) 
+				{
+					
+					if (currentNoteObject==null) 
+					{
+						cloneBtn_clickHandler(null);
+					}else{
+						currentNoteObject.title=titleTxt.text;
+						currentNoteObject.content=contentTxt.text;
+						currentNoteObject.modified_date="修改日期："+TimeTool.getCurrentTime();
+						DataManager.getInstance().saveNotesObject();
+						refreshNotesList();
+						
+						turnToRecto();
+					}
+				}
+			}
+			
+			protected function cloneBtn_clickHandler(event:MouseEvent):void
+			{
+				if (checkTitleAndContent()) 
+				{
+					DataManager.getInstance().notesObject.push({title:titleTxt.text,content:contentTxt.text,modified_date:"修改日期："+TimeTool.getCurrentTime()});
+					DataManager.getInstance().saveNotesObject();
+					
+					refreshNotesList();
+					turnToRecto();
+				}
+			}
+			
+			public function refreshNotesList():void{
+				DataManager.getInstance().readNotesObject();
+				notesAc.source=DataManager.getInstance().notesObject.reverse();
+			}
+			
+			
+			public function checkTitleAndContent():Boolean{
+				if (titleTxt.text=="") 
+				{
+					Toast.make("标题不能为空").show();
+					return false;
+				}
+				if (contentTxt.text=="") 
+				{
+					Toast.make("内容不能为空").show();
+					return false;
+				}
+				
+				return true;
+			}
+			
+			protected function notesListMenuDisplayingHandler(event:Event):void
+			{				
+				MenuBuilder.viewSelectedItem.enabled=notesList.selectedItem;
+				MenuBuilder.deleteSelectedItem.enabled=notesList.selectedItem;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<s:Move3D id="moveFar" duration="250" effectEnd="moveFar_effectEndHandler(event)" autoCenterTransform="true"/>
+		<s:Move3D id="moveNear" duration="250" autoCenterTransform="true"/>
+		<s:Rotate3D target="{recto}" angleYFrom="0" angleYTo="-90" duration="250" autoCenterTransform="true" id="overFirstHalf" effectEnd="overFirstHalf_effectEndHandler(event)"/>
+		<s:Rotate3D target="{verso}" angleYFrom="90" angleYTo="0" duration="250" autoCenterTransform="true" id="overSecondHalf" effectEnd="overSecondHalf_effectEndHandler(event)"/>
+		<s:Rotate3D target="{verso}" angleYFrom="0" angleYTo="90" duration="250" autoCenterTransform="true" id="backFirstHalf" effectEnd="backFirstHalf_effectEndHandler(event)"/>
+		<s:Rotate3D target="{recto}" angleYFrom="-90" angleYTo="0" duration="250" autoCenterTransform="true" id="backSecondHalf" effectEnd="backSecondHalf_effectEndHandler(event)"/>
+	</fx:Declarations>
+	
+	<s:Group id="recto" width="100%" height="100%">
+		
+		<s:Rect width="100%" height="100%">
+			<s:fill>
+				<s:SolidColor color="#C7EDCC"/>
+			</s:fill>
+		</s:Rect>
+		
+		<s:VGroup width="100%" height="100%" left="5" top="5" right="5" bottom="5">
+			<s:List width="100%" height="100%" contentBackgroundAlpha="0" id="notesList" itemRenderer="com.plter.notepad.ui.NotesListCell" dataProvider="{notesAc}" borderVisible="false"></s:List>
+			
+			<s:HGroup width="100%" horizontalAlign="center">
+				<s:Button label="新建" height="30" id="newNoteBtn" width="33.3%" click="newNoteBtn_clickHandler(event)"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:Group>
+	
+	
+	<s:Group id="verso" width="100%" height="100%" visible="false">
+		
+		<s:Rect width="100%" height="100%">
+			<s:fill>
+				<s:SolidColor color="#C7EDCC"/>
+			</s:fill>
+		</s:Rect>
+		
+		<s:VGroup width="100%" height="100%" left="5" top="5" right="5" bottom="5">			
+			<s:HGroup width="100%" verticalAlign="middle">
+				<s:Label text="标题："/>
+				<s:TextInput id="titleTxt" text="" width="100%"/>
+			</s:HGroup>
+			
+			<s:TextArea width="100%" height="100%" text="" id="contentTxt"/>
+			
+			<s:HGroup width="100%">
+				<s:Button id="saveBtn" label="保存" height="30" width="33.3%" click="saveBtn_clickHandler(event)"/>
+				<s:Button id="cloneBtn" label="克隆" height="30" width="33.3%" click="cloneBtn_clickHandler(event)"/>
+				<s:Button id="cancelBtn" label="取消" height="30" width="33.3%" click="cancelBtn_clickHandler(event)"/>
+			</s:HGroup>
+		</s:VGroup>
+	</s:Group>
+	
+</s:Group>

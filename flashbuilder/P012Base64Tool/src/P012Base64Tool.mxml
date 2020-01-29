@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009" 
+					   xmlns:s="library://ns.adobe.com/flex/spark" 
+					   xmlns:mx="library://ns.adobe.com/flex/mx"
+					   width="800" height="600" showStatusBar="false">
+	
+	<fx:Script>
+		<![CDATA[
+			import flash.net.navigateToURL;
+			
+			import mx.utils.Base64Decoder;
+			import mx.utils.Base64Encoder;
+			
+			
+			private var base64En:Base64Encoder=new Base64Encoder;
+			private var base64De:Base64Decoder=new Base64Decoder;
+			
+			protected function btnGoPlter_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(new URLRequest("http://plter.sinaapp.com"));
+			}
+			
+			protected function btnEncode_clickHandler(event:MouseEvent):void
+			{
+				var f:File=new File;
+				f.addEventListener(Event.SELECT,function (event:Event):void{
+					var s:FileStream=new FileStream;
+					s.open(f,FileMode.READ);
+					var bytes:ByteArray=new ByteArray;
+					s.readBytes(bytes);
+					s.close();
+					
+					base64En.reset();
+					base64En.encodeBytes(bytes);
+					taBase64.text=base64En.drain().replace(/\n/g,"");
+				});
+				f.browseForOpen("选择一个文件");
+			}
+			
+			protected function btnDecodeAndSave_clickHandler(event:MouseEvent):void
+			{
+				base64De.reset();
+				base64De.decode(taBase64.text);
+				
+				new File().save(base64De.drain(),"base64data");
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<s:VGroup left="10" top="10" right="10" bottom="10">
+		<s:HGroup verticalAlign="middle">
+			<s:Button label="将文件转码成Base64字符串" id="btnEncode" click="btnEncode_clickHandler(event)"/>
+			<s:Button label="将Base64字符串转成二进制数据并保存为文件" id="btnDecodeAndSave" click="btnDecodeAndSave_clickHandler(event)"/>
+			<mx:LinkButton id="btnGoPlter" label="作者博客：plter.com" click="btnGoPlter_clickHandler(event)"/>
+		</s:HGroup>
+		
+		<s:TextArea width="100%" height="100%" id="taBase64"/>
+	</s:VGroup>
+</s:WindowedApplication>

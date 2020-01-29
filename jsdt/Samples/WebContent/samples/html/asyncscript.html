@@ -1,0 +1,40 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<title>异步加载js脚本程序示例</title>
+<link rel="stylesheet" href="../../lib/css/jquery.ui.all.css">
+<script type="text/javascript" src="../../lib/js/jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="../../lib/js/jquery.plter.asyncscripts.js"></script>
+
+
+<script type="text/javascript">
+	var scriptsArr = [ "../../lib/js/jquery.textchange.min.js",
+				"../../lib/js/jquery.ui.core.min.js",
+				"../../lib/js/jquery.ui.widget.min.js",
+				"../../lib/js/jquery.ui.position.min.js",
+				"../../lib/js/jquery.ui.autocomplete.min.js",
+				"../../lib/js/jquery.plter.emailinput.js" ];
+
+	$(document).ready(function() {
+			
+		var label = $("#label");
+			
+		$.loadScripts({scripts:scriptsArr,done:function(){
+			$("#container").html("<label>邮箱：</label><input type=\"text\" id=\"emailInput\">");
+			$("#emailInput").mailinput();
+		},progress:function(progress){
+			label.text("脚本加载："+Math.floor(progress*100)+"%");
+		},fail:function(filePath){
+			alert("文件 "+filePath+" 加载失败");
+		}});
+	});
+
+	</script>
+</head>
+<body>
+	<label id="label">脚本加载：0%</label>
+	<br>
+	<p id="container"></p>
+</body>
+</html>

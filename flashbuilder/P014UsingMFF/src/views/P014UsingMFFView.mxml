@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:View xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		xmlns:s="library://ns.adobe.com/flex/spark" title="主页视图" creationComplete="view1_creationCompleteHandler(event)">
+	<fx:Script>
+		<![CDATA[
+			import com.plter.mobwinforflash.MFF;
+			
+			import mx.events.FlexEvent;
+			
+			protected function view1_creationCompleteHandler(event:FlexEvent):void
+			{
+				MFF.mff.addToBottom();
+			}
+			
+			protected function btnAddToBottom_clickHandler(event:MouseEvent):void
+			{
+				MFF.mff.addToBottom();
+				
+			}
+			
+			protected function btnAddToTop_clickHandler(event:MouseEvent):void
+			{
+				MFF.mff.addToTop();
+			}
+			
+		]]>
+	</fx:Script>
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	
+	<s:Button width="100%" label="Add To Top" id="btnAddToTop" click="btnAddToTop_clickHandler(event)"/>
+	<s:Button width="100%" label="Add To Bottom" id="btnAddToBottom" click="btnAddToBottom_clickHandler(event)"/>
+</s:View>

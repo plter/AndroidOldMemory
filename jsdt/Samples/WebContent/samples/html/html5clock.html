@@ -1,0 +1,47 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>New Web Project</title>
+ 
+		<script type="text/javascript">
+ 
+			var clockCanvas;
+			var ct;
+			var CANVAS_WIDTH=200;
+			var CANVAS_HEIGHT=50;
+ 
+			function pageInit(){
+				clockCanvas=document.createElement("canvas");
+				clockCanvas.width=CANVAS_WIDTH;
+				clockCanvas.height=CANVAS_HEIGHT;
+				document.body.appendChild(clockCanvas);
+ 
+				ct=clockCanvas.getContext("2d");
+ 
+				showTime();
+				setInterval(showTime,1000);
+			}
+ 
+			function showTime(){
+				var date=new Date();
+ 
+				ct.clearRect(0,0,CANVAS_WIDTH,CANVAS_HEIGHT);
+				ct.font="50px Arial";
+				ct.fillStyle="#0000FF";
+				ct.fillText(timeFormat(date.getHours())+":"+timeFormat(date.getMinutes())+":"+timeFormat(date.getSeconds()),0,CANVAS_HEIGHT);
+			}
+ 
+			function timeFormat(value){
+				if(value>=10){
+					return value;
+				}else{
+					return "0"+value;
+				}
+			}
+ 
+		</script>
+    </head>
+    <body onload="pageInit();">
+        Please use Firefox,Safari,Chrome,Opera to view this example<br/>
+    </body>
+</html>

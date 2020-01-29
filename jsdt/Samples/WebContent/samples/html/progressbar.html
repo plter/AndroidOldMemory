@@ -1,0 +1,110 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>New Web Project</title>
+ 
+		<script type="text/javascript">
+ 
+			/**
+			 * JavaScript进度条
+			 */
+			function ProgressBar(){
+				var value=0;
+				var maxValue=100;
+				var MAX_VALUE=200;
+				var HEIGHT=10;
+				var bgColor="#0000FF";
+				var color="#FF0000";
+ 
+				function refreshColor(){
+					f.style.backgroundColor=color;
+				}
+ 
+				function refreshBgColor(){
+					bg.style.backgroundColor=bgColor;
+				}
+ 
+				function refreshValue(){
+					f.style.width=(200*value/maxValue)+"px";
+				}
+ 
+				var container=document.createElement("div");
+				container.style.margin="0px";
+ 
+				var bg=document.createElement("div");
+				bg.style.position="absolute";
+				bg.style.width=MAX_VALUE+"px";
+				bg.style.height=HEIGHT+"px";
+				refreshBgColor();
+				container.appendChild(bg);
+ 
+				var f=document.createElement("div");
+				f.style.position="absolute";
+				refreshValue();
+				f.style.height=HEIGHT+"px";
+				refreshColor();
+				container.appendChild(f);
+ 
+				/**
+				 * 设置进度条颜色
+				 * @param {String} c	css样式
+				 */
+				this.setColor=function(c){
+					color=c;
+					refreshColor();
+				}
+ 
+				/**
+				 * 设置进度条背景颜色
+				 * @param {String} c	css样式
+				 */
+				this.setBgColor=function(c){
+					bgColor=c;
+					refreshBgColor();
+				}
+ 
+				/**
+				 * 设置进度
+				 * @param {Number} v	进度当前值
+				 * @param {Number} max	进度总值
+				 */
+				this.setProgress=function(v,max){
+					value=v;
+					maxValue=max;
+					if(value>maxValue){
+						value=maxValue;
+					}
+ 
+					refreshValue();
+				}
+ 
+				this.getDiv=function(){
+					return container;
+				}
+			}
+ 
+			var bar=new ProgressBar();
+			var i=0;
+			var max=100;
+			function pageInit(){
+				bar=new ProgressBar();
+				document.body.appendChild(bar.getDiv());
+ 
+				setInterval(refreshBarValue,20);
+			}
+ 
+			function refreshBarValue(){
+				bar.setProgress(i,max);
+ 
+				i++;
+				if(i>max){
+					i=0;
+				}
+			}
+ 
+		</script>
+    </head>
+    <body onload="pageInit();">
+ 
+    </body>
+</html>

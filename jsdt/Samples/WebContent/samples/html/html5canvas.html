@@ -1,0 +1,84 @@
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=GB18030">
+        <title>Insert title here</title>
+        <style type="text/css">
+ 
+			body{
+				margin:0px;
+			}
+ 
+            #mainContainer {
+                width: 500px;
+                height: 375px;
+                border-style: dashed;
+            }
+        </style>
+        <script type="text/javascript">
+ 
+            var mainCanvas;
+            var mainCt;
+ 
+            function pageInit(){
+                mainCanvas = document.getElementById("mainCanvas");
+                mainCt = mainCanvas.getContext("2d");
+                mainCt.strokeStyle = "#FF0000";
+                mainCt.lineWidth = 2;
+ 
+				document.onmouseup=documentMouseUpHandler;
+				mainCanvas.onmousedown=canvasMouseDownHandler;
+            }
+ 
+            function canvasMouseDownHandler(event){
+                var canvasMouseX = event.layerX;
+                if (!canvasMouseX) {
+                    canvasMouseX = event.x;
+                }
+                var canvasMouseY = event.layerY;
+                if (!canvasMouseY) {
+                    canvasMouseY = event.y;
+                }
+				mainCt.beginPath();
+				mainCt.moveTo(canvasMouseX,canvasMouseY);
+ 
+				mainCanvas.onmousemove = canvasMouseMoveHandler;
+            }
+ 
+            function documentMouseUpHandler(event){
+                mainCanvas.onmousemove = null;
+            }
+ 
+            function canvasMouseMoveHandler(event){
+            	var canvasMouseX = event.layerX;
+                if (!canvasMouseX) {
+                    canvasMouseX = event.x;
+                }
+                var canvasMouseY = event.layerY;
+                if (!canvasMouseY) {
+                    canvasMouseY = event.y;
+                }
+				mainCt.lineTo(canvasMouseX,canvasMouseY);
+				mainCt.stroke();
+            }
+ 
+			function clearCanvas(event){
+				mainCt.clearRect(0,0,500,375);
+			}
+ 
+			function saveCanvas(event){
+				window.open(mainCanvas.toDataURL(),"保存画布","width=520,height=400,location=no,menubar=no,resizable=no,scrollbars=no,status=no,titlebar=no,toolbar=no");
+			}
+        </script>
+    </head>
+    <body onload="pageInit();">
+        <div id="mainContainer">
+            <canvas id="mainCanvas" width="500" height="375">
+                你的浏览器不支持html5，请用firefox,safari,chrome或者opera
+            </canvas>
+			<br>
+			<br>
+			<input type="button" value="清空画布" onclick="clearCanvas(event)">
+			<input type="button" value="保存" onclick="saveCanvas(event)">
+        </div>
+    </body>
+</html>

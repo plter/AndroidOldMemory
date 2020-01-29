@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="break_pics_btn_label">打乱</string>
+    <string name="stop_break_pics_btn_label">停止</string>
+    <string name="reset_pics_btn_label">重置</string>
+    <string name="change_image_btn_label">换图</string>
+    <string name="show_source_image_btn_label">原图</string>
+    <string name="app_name">拼图</string>
+
+</resources>

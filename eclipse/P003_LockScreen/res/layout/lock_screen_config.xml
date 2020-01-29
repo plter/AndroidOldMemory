@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+  xmlns:android="http://schemas.android.com/apk/res/android"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:orientation="vertical">
+    <CheckedTextView android:id="@+id/enableOpenLockCtv" android:text="@string/enable_lock_screen" android:gravity="center_vertical" android:layout_height="wrap_content" android:enabled="true" android:textSize="22dip" android:checkMark="?android:attr/listChoiceIndicatorMultiple" android:layout_width="match_parent"></CheckedTextView>
+    <TextView android:layout_height="wrap_content" android:textColor="#00FF00" android:layout_width="match_parent" android:id="@+id/lockScreenTip"></TextView>
+    <TextView android:layout_height="wrap_content" android:text="@string/help" android:id="@+id/textView1" android:layout_width="match_parent"></TextView>
+    <TextView android:text="@string/plter" android:textColor="#00FF00" android:layout_width="match_parent" android:layout_height="wrap_content"></TextView>
+</LinearLayout>

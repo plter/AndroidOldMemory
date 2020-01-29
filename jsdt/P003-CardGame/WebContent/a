@@ -1,0 +1,23 @@
+有一个Socket服务器代码如下所示：
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class Server {
+	public static void main(String[] args) {
+		try {
+			ServerSocket server=new ServerSocket(8000);
+			System.out.println("Server Started at port 8000");
+			
+			while(true){
+				Socket client=server.accept();
+				client.getOutputStream().write(new String("Hello Client!\n").getBytes());
+				client.close();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+}
+
+请写出Android客户端的代码连接此服务器，并取得服务器端的输出信息。

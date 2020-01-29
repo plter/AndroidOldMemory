@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:ItemRenderer xmlns:fx="http://ns.adobe.com/mxml/2009" 
+				xmlns:s="library://ns.adobe.com/flex/spark" 
+				xmlns:mx="library://ns.adobe.com/flex/mx" 
+				autoDrawBackground="true" doubleClickEnabled="true" doubleClick="itemrenderer1_doubleClickHandler(event)">
+	
+	<s:layout>
+		<s:VerticalLayout/>
+	</s:layout>
+	
+	<fx:Script>
+		<![CDATA[
+			import mx.core.FlexGlobals;
+			protected function itemrenderer1_doubleClickHandler(event:MouseEvent):void
+			{
+				FlexGlobals.topLevelApplication.appMainContainer.viewNote(data);
+			}
+		]]>
+	</fx:Script>
+	
+	<s:Label text="{data.title}" fontSize="18" paddingLeft="5" paddingRight="5" paddingTop="5"/>
+	<s:Label text="{data.modified_date}" fontSize="12" paddingLeft="5" paddingRight="5"/>
+	<mx:HRule width="100%" strokeWidth="1"/>
+</s:ItemRenderer>

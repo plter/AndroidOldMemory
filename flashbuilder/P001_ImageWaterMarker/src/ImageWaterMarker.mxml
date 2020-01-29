@@ -1,0 +1,335 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Application xmlns:fx="http://ns.adobe.com/mxml/2009" xmlns:s="library://ns.adobe.com/flex/spark" xmlns:mx="library://ns.adobe.com/flex/mx" fontFamily="宋体" xmlns:net="com.plter.iwm.flash.net.*"
+			   xmlns:tools="com.plter.iwm.tools.*">
+	
+	<fx:Script>
+		<![CDATA[
+			import com.plter.iwm.tools.WaterMarkerEvent;
+			import com.plter.iwm.views.AboutWindow;
+			import com.plter.iwm.views.ConfigWindow;
+			import com.plter.iwm.views.ImageBrowerWindow;
+			import com.plter.utils.zip.ZipEncoder;
+			
+			import flash.net.navigateToURL;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.Menu;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.DropdownEvent;
+			import mx.events.FlexEvent;
+			import mx.events.MenuEvent;
+			
+			/**
+			 * 主页
+			 */
+			private const SITE_HOME_REQ:URLRequest=new URLRequest("http://plter.com");
+			
+			private var _imageTypes:Array=[new FileFilter("支持的图片格式(*.jpg;*.jpeg;*.png)", "*.jpg;*.jpeg;*.png")];
+			
+			[Bindable]
+			private var selectedFileListData:ArrayCollection=new ArrayCollection;
+			[Bindable]
+			private var markedFileListData:ArrayCollection=new ArrayCollection;
+			
+			
+			//右键菜单
+			private var selectedFileListMenu:ContextMenu;
+			private var viewImageItem:ContextMenuItem;
+			private var deleteImageItem:ContextMenuItem;
+			
+			//标记后的文件列表右键菜单
+			private var markedFileListMenu:ContextMenu;
+			private var viewMarkedImageItem:ContextMenuItem;
+			
+			/**
+			 * 切换风格的按钮
+			 */
+			private var changeStyleMenu:Menu;
+			
+			public static function get mainApp():ImageWaterMarker
+			{
+				return FlexGlobals.topLevelApplication as ImageWaterMarker;
+			}
+			
+			
+			/**
+			 * 建立选中文件列表
+			 * @param arr 包含FileReference对象的数组
+			 */
+			public function buildSelectedFileList(arr:Array):void
+			{
+				selectedFileListData.source=arr;
+			}
+			
+			/**
+			 * 建立标记后的文件列表
+			 */
+			public function buildMarkedFileList(arr:Array):void
+			{
+				markedFileListData.source=arr;
+			}
+			
+			/**
+			 * 删除选中的项目
+			 */
+			public function deleteSelectedItem():void
+			{
+				selectedFileListData.removeItemAt(selectedFileList.selectedIndex);
+			}
+			
+			protected function aboutBtn_clickHandler(event:MouseEvent):void
+			{
+				AboutWindow.show();
+			}
+			
+			protected function selectImagesBtn_clickHandler(event:MouseEvent):void
+			{
+				_frl.browse(_imageTypes);
+			}
+			
+			
+			protected function _frl_selectHandler(event:Event):void
+			{
+				buildSelectedFileList(_frl.fileList);
+			}
+			
+			
+			protected function selectedFileList_doubleClickHandler(event:MouseEvent):void
+			{
+				viewImage();
+			}
+			
+			
+			protected function selectedFileList_creationCompleteHandler(event:FlexEvent):void
+			{
+				selectedFileListMenu=new ContextMenu;
+				selectedFileListMenu.hideBuiltInItems();
+				selectedFileListMenu.addEventListener(ContextMenuEvent.MENU_SELECT, menuSelectHandler);
+				
+				viewImageItem=new ContextMenuItem("查看选中图片");
+				selectedFileListMenu.customItems.push(viewImageItem);
+				viewImageItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, selectMenuItemHandler);
+				deleteImageItem=new ContextMenuItem("删除选中图片");
+				selectedFileListMenu.customItems.push(deleteImageItem);
+				deleteImageItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, selectMenuItemHandler);
+				
+				selectedFileList.contextMenu=selectedFileListMenu;
+			}
+			
+			private function selectMenuItemHandler(event:ContextMenuEvent):void
+			{
+				switch (event.target)
+				{
+					case viewImageItem:
+						viewImage();
+						break;
+					case deleteImageItem:
+						deleteSelectedItem();
+						break;
+					case viewMarkedImageItem:
+						viewMarkedImage();
+						break;
+				}
+			}
+			
+			private function menuSelectHandler(event:ContextMenuEvent):void
+			{
+				
+				var ifItemSelecetd:Boolean=false;
+				
+				
+				switch (event.target)
+				{
+					case selectedFileListMenu:
+						ifItemSelecetd=Boolean(selectedFileList.selectedItem);
+						viewImageItem.enabled=ifItemSelecetd;
+						deleteImageItem.enabled=ifItemSelecetd;
+						break;
+					case markedFileListMenu:
+						ifItemSelecetd=Boolean(markedFileList.selectedItem);
+						viewMarkedImageItem.enabled=ifItemSelecetd;
+						break;
+				}
+				
+			}
+			
+			/**
+			 * 查看选中图片
+			 */
+			private function viewImage():void
+			{
+				var fr:FileReference=selectedFileList.selectedItem as FileReference;
+				if (Boolean(fr))
+				{
+					ImageBrowerWindow.viewImage(fr);
+				}
+			}
+			
+			
+			protected function startMarkBtn_clickHandler(event:MouseEvent):void
+			{
+				if (selectedFileListData.length > 0)
+				{
+					if (markInputTxt.text != "")
+					{
+						wm.startMark(selectedFileListData.source);
+					}
+					else
+					{
+						Alert.show("请输入水印内容", "提醒");
+					}
+				}
+				else
+				{
+					Alert.show("'选中的文件'列表中没有文件", "提醒");
+				}
+			}
+			
+			
+			protected function siteHomeBtn_clickHandler(event:MouseEvent):void
+			{
+				navigateToURL(SITE_HOME_REQ, "_blank");
+			}
+			
+			
+			protected function markedFileList_doubleClickHandler(event:MouseEvent):void
+			{
+				viewMarkedImage();
+			}
+			
+			protected function markedFileList_creationCompleteHandler(event:FlexEvent):void
+			{
+				markedFileListMenu=new ContextMenu;
+				markedFileListMenu.hideBuiltInItems();
+				markedFileListMenu.addEventListener(ContextMenuEvent.MENU_SELECT, menuSelectHandler);
+				
+				viewMarkedImageItem=new ContextMenuItem("查看选中文件");
+				markedFileListMenu.customItems.push(viewMarkedImageItem);
+				viewMarkedImageItem.addEventListener(ContextMenuEvent.MENU_ITEM_SELECT, selectMenuItemHandler);
+				
+				markedFileList.contextMenu=markedFileListMenu;
+			}
+			
+			private function viewMarkedImage():void
+			{
+				var fr:FileReference=markedFileList.selectedItem as FileReference;
+				if (Boolean(fr))
+				{
+					ImageBrowerWindow.loadBytes(wm.getMarkedFile(fr.name));
+				}
+			}
+			
+			protected function saveMarkedFiles_clickHandler(event:MouseEvent):void
+			{
+				saveMarkedFiles();
+			}
+			
+			
+			protected function wm_markedHandler(event:WaterMarkerEvent):void
+			{
+				Alert.show("文件打水印已经成功，是否保存", "提醒", Alert.YES | Alert.NO, null, closeHandler);
+				saveMarkedFilesBtn.enabled=markedFileListData.length>0;
+			}
+			
+			private function closeHandler(event:CloseEvent):void
+			{
+				if (event.detail == Alert.YES)
+				{
+					saveMarkedFiles();
+				}
+			}
+			
+			private function saveMarkedFiles():void{
+				var fr:FileReference=new FileReference;
+				fr.save(wm.getMarkedFilesZipBytes(), "images.zip");
+			}
+			
+			protected function configMarkInputTxtBtn_clickHandler(event:MouseEvent):void
+			{
+				ConfigWindow.show();
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+		<net:PFileReferenceList id="_frl" select="_frl_selectHandler(event)"/>
+		<tools:WaterMarker id="wm" marked="wm_markedHandler(event)"/>
+	</fx:Declarations>
+	<s:Group width="100%" height="100%" top="10" left="10" right="10" bottom="10">
+		<s:layout>
+			<s:VerticalLayout/>
+		</s:layout>
+		
+		<s:Group>
+			<s:layout>
+				<s:HorizontalLayout/>
+			</s:layout>
+			
+			<s:Label text="批量打水印工具" fontWeight="bold" fontSize="20"/>
+			<s:Button id="selectImagesBtn" label="选择图片" click="selectImagesBtn_clickHandler(event)"/>
+			<s:Button id="startMarkBtn" label="开始打水印" click="startMarkBtn_clickHandler(event)"/>
+			<s:Button label="配置" id="configMarkInputTxtBtn" click="configMarkInputTxtBtn_clickHandler(event)"/>
+			<s:Button id="aboutBtn" label="关于" click="aboutBtn_clickHandler(event)"/>
+			<s:Button id="siteHomeBtn" label="主页" click="siteHomeBtn_clickHandler(event)"/>
+		</s:Group>
+		
+		<s:Group width="100%">
+			<s:layout>
+				<s:HorizontalLayout/>
+			</s:layout>
+			
+			<s:Label text="水印文字：" verticalAlign="middle" height="20"/>
+			<s:TextInput id="markInputTxt" width="100%" text=""/>
+		</s:Group>
+		
+		<s:Group width="100%" height="100%">
+			<s:layout>
+				<s:HorizontalLayout/>
+			</s:layout>
+			
+			<s:Group width="50%" height="100%">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				
+				<s:Label text="选中的文件："/>
+				<mx:DataGrid dataProvider="{selectedFileListData}" id="selectedFileList" width="100%" height="100%" doubleClickEnabled="true" doubleClick="selectedFileList_doubleClickHandler(event)"
+							 creationComplete="selectedFileList_creationCompleteHandler(event)">
+					<mx:columns>
+						<mx:DataGridColumn headerText="文件名" dataField="name"/>
+						<mx:DataGridColumn headerText="文件大小/字节" dataField="size" width="120"/>
+						<mx:DataGridColumn headerText="文件类型" dataField="type" width="100"/>
+					</mx:columns>
+				</mx:DataGrid>
+			</s:Group>
+			
+			<s:Group width="50%" height="100%">
+				<s:layout>
+					<s:VerticalLayout/>
+				</s:layout>
+				
+				<s:Label text="生成的文件："/>
+				<mx:DataGrid id="markedFileList" dataProvider="{this.markedFileListData}" width="100%" height="100%" doubleClickEnabled="true" doubleClick="markedFileList_doubleClickHandler(event)"
+							 creationComplete="markedFileList_creationCompleteHandler(event)">
+					<mx:columns>
+						<mx:DataGridColumn headerText="文件名" dataField="name"/>
+						<mx:DataGridColumn headerText="文件大小/字节" dataField="size" width="120"/>
+						<mx:DataGridColumn headerText="文件类型" dataField="type" width="100"/>
+					</mx:columns>
+				</mx:DataGrid>
+				
+				<s:Group width="100%">
+					<s:layout>
+						<s:HorizontalLayout/>
+					</s:layout>
+					<s:Button id="saveMarkedFilesBtn" label="保存" enabled="false" click="saveMarkedFiles_clickHandler(event)"/>
+				</s:Group>
+			</s:Group>
+		</s:Group>
+		
+	</s:Group>
+</s:Application>
